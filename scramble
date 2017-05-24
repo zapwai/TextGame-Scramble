@@ -4,8 +4,6 @@
 # David Ferrone, Aug 2014
 # Final update May 2017, adding the high score file.
 ##############################
-use strict;
-use warnings;
 
 my $filename = "words";
 
