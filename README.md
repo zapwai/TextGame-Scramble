@@ -13,5 +13,6 @@ In hard the length of words increases, along with your clock time. But one wrong
 
 ---
 
-The game takes anagrams into account. 
-(words is based on the dictionary file found in /usr/dict/words. If you find it necessary to add a word, just put it at the end of the file.)
+The game takes anagrams into account.
+
+(words is based on the dictionary file found in /usr/dict/words. If you find it necessary to add a word, just put it at the end of the file on its own line. I generally only add words if they are anagrams of words already present.)
