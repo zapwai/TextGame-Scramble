@@ -1,19 +1,22 @@
 #!/usr/bin/perl
-#
+##############################
 # Thanks for playing SCRAMBLE!
 # David Ferrone, Aug 2014
+# Final update May 2017, adding the high score file.
 ##############################
-# Keep words in the same directory.  
-# You can find this in /usr/dict/words or /usr/share/dict/words
+use strict;
+use warnings;
 
-$filename = "words";
+my $filename = "words";
+
+my ($win_count, $loss_count);
 
 sub is_word{
 # Input: $text, a string
 # Output: 1 if $text is a word in /usr/dict/words, 0 otherwise.
-    my $text = $_[0];    
+    my $text = shift;
     open(my $file,  "<",  $filename)  or die "Can't open dictionary: $!";
-    @words = <$file>;
+    my @words = <$file>;
     close($file);
 
     chomp @words;
@@ -40,9 +43,9 @@ sub is_anagram
 
 sub select_word{
 #input: length of word, an integer.
-#output a random word from /usr/dict/words of that length.
+#output a random word from words file of that length.
 
-    my $desired_length = @_[0];
+    my $desired_length = shift;
     my $selected_word;
     my $candidate_count = 0;
 
@@ -61,9 +64,9 @@ sub select_word{
 sub mix_word{
 #input: a string
 #output: a permutation of that string (an array)
-    my $word = @_[0];
+    my $word = shift;
     my @new_word;
-    @letters = split(//, $word);
+    my @letters = split(//, $word);
 
     while ($#letters >= 0){ my $N = int ( rand($#letters) );
 			    ($letters[$N], $letters[$#letters]) =
@@ -72,7 +75,7 @@ sub mix_word{
 
 # ~~~~~~~~~~~ ~~~~~~~~~~~ ~~~~~~~~~~~ ~~~~~~~~~~~ ~~~~~~~~~~~
 sub rules{
-    print "In basic mode you unscramble random 5 letter words. If you guess incorrectly 3 times, the game ends.\n";
+    print "\nIn basic mode you unscramble random 5 letter words. If you guess incorrectly 3 times, the game ends.\n";
     print "In moderate they are 6 letter words, but you only have 30 seconds until the game ends.\n";
     print "In hard the length of words increases, along with your clock time. But one wrong answer and ...\n\n";
 }
@@ -101,10 +104,10 @@ sub the_game{
 
     print "\nThe scrambled word is...\n","\t\t\t\t",@new_word,"\n";
 
-    print "What is your guess?\n";
-    chomp($text = <STDIN>);
-#    print "\n", $text, " eh? ... \n";
+    print "What is your guess? ";
+    chomp(my $text = <STDIN>);
 
+    $text =~ s/^\s+|\s+$//g;
     $text = lc($text);
     $word = lc($word);
     if ($text eq $word) {
@@ -112,7 +115,7 @@ sub the_game{
 	return 1;
     }				
     elsif (is_anagram($text, $word) && is_word($text)) {
-	print "Oh, er... yes! That's correct!\n";
+	print "Oh, er... yes! That's correct! \t(The word was $word)\n";
 	return 1;
     }
     else {print "Sorry, you lose this round. \t(The word was $word)\n\n"; return 0;}
@@ -133,7 +136,11 @@ sub basic_game{
 	    else {$loss_count++}
 	}
 	print "Your overall win count was $win_count!\n\n";
-	$playing_game = play_again;
+	print "Please enter your initials: ";
+	chomp (my $nick = <STDIN>);
+	system("perl highscore.pl easy $nick $win_count");
+	
+	$playing_game = play_again();
     }
 }
 
@@ -162,7 +169,11 @@ sub moderate_game{
 	print "\n\tTime is up!\n";
 	print "Your loss count was $loss_count.\n";
 	print "Your overall win count was $win_count!\n\n";
-	$playing_game = play_again;
+	print "Please enter your initials: ";
+	chomp (my $nick = <STDIN>);
+	system("perl highscore.pl mod $nick $win_count");
+
+	$playing_game = play_again();
     }
 }
 
@@ -191,7 +202,11 @@ sub hard_game{
 	}
 
 	print "Your overall win count was $win_count!\n\n";
-	$playing_game = play_again;
+	print "Please enter your initials: ";
+	chomp (my $nick = <STDIN>);
+	system("perl highscore.pl hard $nick $win_count");
+
+	$playing_game = play_again();
     }
 }
 
@@ -199,15 +214,15 @@ sub hard_game{
 # ~~~~~~~~~~~
 sub Menu{
 print "\t\t\tWelcome to SCRAMBLE!\n";
-print "(See (r)ules or (q)uit.)\n";
-print "Would you like to play (b)asic, (m)oderate, or (h)ard? ";
+print "\t\t      (See (r)ules or (q)uit.)\n";
+print "\tWould you like to play (b)asic, (m)oderate, or (h)ard? ";
 chomp (my $input_char = <STDIN>);
-if ($input_char eq 'b') {basic_game}
-elsif ($input_char eq 'm') {moderate_game}
-elsif ($input_char eq 'h') {hard_game}
-elsif ($input_char eq 'r') {rules; Menu}
+if ($input_char eq 'b') {basic_game()}
+elsif ($input_char eq 'm') {moderate_game()}
+elsif ($input_char eq 'h') {hard_game()}
+elsif ($input_char eq 'r') {rules; Menu()}
 elsif ($input_char eq 'q') {print "Okay, bye!\n"}
-else {print "Sorry, unavailable right now. Oooops!\n"}
+else {print "Sorry, that command is unavailable!\n"}
 }
 
-Menu
+Menu();
